@@ -56,12 +56,11 @@ def fetch_amap_pois(keywords: str, types: str, city: str, pages: int = 3, offset
 
         for p in pois:
             loc = p.get("location", "")
-            try:
-                lng_str, lat_str = loc.split(",")
-                lng = float(lng_str)
-                lat = float(lat_str)
-            except Exception:
-                continue
+            
+            lng_str, lat_str = loc.split(",")
+            lng = float(lng_str)
+            lat = float(lat_str)
+            
 
             results.append({
                 "name": p.get("name"),
@@ -91,41 +90,12 @@ def api_restaurants():
     return jsonify({"items": items})
 
 
- 
-
-
- 
-
-
- 
-
-
- 
-
-
- 
-
-
- 
-
-
- 
-
-
- 
-
 
 def _port() -> int:
     val = os.getenv("PORT")
-    try:
-        return int(val) if val else 5000
-    except Exception:
-        return 5000
+    return int(val) if val else 5000
 
 
-########################
-# 已移除边界与环路辅助逻辑（不再用于静态图生成）
-########################
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=_port(), debug=True)
