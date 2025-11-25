@@ -271,6 +271,17 @@ function exportMapImage() {
   setTimeout(() => {
     const mapContainer = document.getElementById('map');
     
+    // 隐藏所有原始标记，确保画面干净
+    const leafletMarkerPane = mapContainer.querySelector('.leaflet-marker-pane');
+    const leafletPopupPane = mapContainer.querySelector('.leaflet-popup-pane');
+    
+    if (leafletMarkerPane) {
+      leafletMarkerPane.style.display = 'none';
+    }
+    if (leafletPopupPane) {
+      leafletPopupPane.style.display = 'none';
+    }
+    
     // 创建导出容器，包含所有信息
     const exportContainer = document.createElement('div');
     exportContainer.className = 'export-container';
@@ -300,22 +311,21 @@ function exportMapImage() {
       const latLng = L.latLng(lat, lng);
       const point = map.latLngToContainerPoint(latLng);
       
-      // 创建餐厅标记（红点）- 放大一倍，提高饱和度
+      // 创建餐厅标记（更大更饱和的红点）
       const restaurantMarker = document.createElement('div');
       restaurantMarker.className = 'export-restaurant-marker';
       restaurantMarker.style.position = 'absolute';
       restaurantMarker.style.left = point.x + 'px';
       restaurantMarker.style.top = point.y + 'px';
-      restaurantMarker.style.width = '32px'; // 原来16px放大到32px
-      restaurantMarker.style.height = '32px'; // 原来16px放大到32px
+      restaurantMarker.style.width = '24px';
+      restaurantMarker.style.height = '24px';
       restaurantMarker.style.background = '#FF4444'; // 更高饱和度的红色
-      restaurantMarker.style.border = '4px solid white'; // 边框也加粗
+      restaurantMarker.style.border = '4px solid white';
       restaurantMarker.style.borderRadius = '50%';
-      restaurantMarker.style.transform = 'translate(-16px, -16px)'; // 中心点对齐
+      restaurantMarker.style.transform = 'translate(-12px, -12px)'; // 调整中心点
       restaurantMarker.style.zIndex = '9998';
-      restaurantMarker.style.boxShadow = '0 0 0 4px rgba(255, 68, 68, 0.6), 0 4px 16px rgba(255, 68, 68, 0.4)'; // 更强的发光效果
+      restaurantMarker.style.boxShadow = '0 0 0 3px rgba(255,68,68,0.6), 0 4px 12px rgba(0,0,0,0.4)';
       restaurantMarker.style.pointerEvents = 'none';
-      restaurantMarker.style.filter = 'saturate(1.8) brightness(1.1)'; // 提高饱和度和亮度
       
       exportContainer.appendChild(restaurantMarker);
       
@@ -329,10 +339,10 @@ function exportMapImage() {
         <div class="restaurant-coord">${lat.toFixed(4)}°, ${lng.toFixed(4)}°</div>
       `;
       
-      // 设置位置（相对于地图容器）- 调整位置适应更大的标记
+      // 设置位置（相对于地图容器）- 确保与更大的红点标记完美对齐
       restaurantCard.style.position = 'absolute';
-      restaurantCard.style.left = (point.x + 40) + 'px'; // 更大的偏移，避免与32px标记重叠
-      restaurantCard.style.top = (point.y - 80) + 'px'; // 更高的位置，给大标记留出空间
+      restaurantCard.style.left = (point.x + 30) + 'px'; // 在更大的标记右侧
+      restaurantCard.style.top = (point.y - 70) + 'px'; // 调整位置适应更大的标记
       restaurantCard.style.background = 'rgba(0,0,0,0.9)';
       restaurantCard.style.color = 'white';
       restaurantCard.style.padding = '10px';
@@ -378,39 +388,70 @@ function exportMapImage() {
     // 将导出容器添加到地图容器中
     mapContainer.appendChild(exportContainer);
     
-    // 短暂显示预览，然后自动导出
-    setStatus('正在生成专业美食地图...');
-    
-    // 等待2秒让用户看到预览效果，然后自动导出
+    // 直接自动导出预览画面
     setTimeout(() => {
-      // 使用更精确的html2canvas配置
-      html2canvas(document.body, {
+      // 先显示进度提示
+      const saveHint = document.createElement('div');
+      saveHint.className = 'temp-save-hint';
+      saveHint.innerHTML = `
+        <div class="export-progress">
+          <div class="progress-text">正在生成专业美食地图...</div>
+          <div class="progress-spinner"></div>
+        </div>
+      `;
+      saveHint.style.position = 'fixed';
+      saveHint.style.top = '50%';
+      saveHint.style.left = '50%';
+      saveHint.style.transform = 'translate(-50%, -50%)';
+      saveHint.style.zIndex = '20000';
+      saveHint.style.color = 'white';
+      saveHint.style.fontFamily = 'Inter, system-ui, sans-serif';
+      saveHint.style.background = 'rgba(0,0,0,0.8)';
+      saveHint.style.padding = '20px';
+      saveHint.style.borderRadius = '8px';
+      saveHint.style.backdropFilter = 'blur(10px)';
+      
+      document.body.appendChild(saveHint);
+      
+      // 使用html2canvas直接捕获当前预览画面
+      html2canvas(mapContainer, {
         useCORS: true,
         allowTaint: true,
         scale: 2, // 高分辨率
         backgroundColor: null,
         logging: false,
-        width: window.innerWidth,
-        height: window.innerHeight,
-        scrollX: -window.scrollX,
-        scrollY: -window.scrollY,
+        width: mapContainer.offsetWidth,
+        height: mapContainer.offsetHeight,
+        scrollX: 0,
+        scrollY: 0,
         ignoreElements: (element) => {
-          // 只忽略控制面板，保留其他所有内容
-          return element.id === 'selectedPanel' || 
-                 element.classList.contains('selected-panel');
+          // 忽略控制面板和进度提示，只保留地图内容
+          return element.classList && (
+            element.classList.contains('selected-panel') ||
+            element.id === 'selectedPanel' ||
+            element.classList.contains('temp-save-hint') ||
+            element.classList.contains('topbar') // 也隐藏顶部工具栏
+          );
         }
       }).then(canvas => {
-        // 创建临时下载链接
+        // 移除进度提示
+        document.body.removeChild(saveHint);
+        
+        // 恢复原始标记显示
+        if (leafletMarkerPane) {
+          leafletMarkerPane.style.display = '';
+        }
+        if (leafletPopupPane) {
+          leafletPopupPane.style.display = '';
+        }
+        
+        // 自动下载图片
         const link = document.createElement('a');
         link.download = `北京美食地图_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}_${selectedRestaurants.length}家餐厅.png`;
         link.href = canvas.toDataURL('image/png', 0.9);
-        
-        // 触发下载
-        document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
         
-        // 显示成功提示
+        // 显示成功消息
         setStatus(`✅ 成功导出${selectedRestaurants.length}家餐厅的专业美食地图`);
         
         // 清理并恢复原始状态
@@ -432,6 +473,19 @@ function exportMapImage() {
       }).catch(err => {
         console.error('html2canvas导出失败:', err);
         
+        // 恢复原始标记显示
+        if (leafletMarkerPane) {
+          leafletMarkerPane.style.display = '';
+        }
+        if (leafletPopupPane) {
+          leafletPopupPane.style.display = '';
+        }
+        
+        // 移除进度提示
+        if (document.body.contains(saveHint)) {
+          document.body.removeChild(saveHint);
+        }
+        
         // 恢复原始状态
         mapContainer.removeChild(exportContainer);
         markersLayer.clearLayers();
@@ -440,10 +494,10 @@ function exportMapImage() {
         });
         map.setView(originalCenter, originalZoom);
         
-        setStatus('导出失败，请重试');
+        setStatus('❌ 导出失败，请重试');
         alert('导出失败：' + err.message + '\n请检查浏览器权限或使用Chrome浏览器。');
       });
-    }, 2000); // 2秒预览时间
+    }, 800); // 稍等确保画面完全稳定
   }, 1500); // 等待地图完全稳定
 }
 

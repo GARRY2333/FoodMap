@@ -318,16 +318,15 @@ body {
 /* 导出模式下的餐厅标记 */
 .export-restaurant-marker {
   position: absolute !important;
-  width: 32px !important; /* 放大一倍 */
-  height: 32px !important; /* 放大一倍 */
+  width: 24px !important;
+  height: 24px !important;
   background: #FF4444 !important; /* 更高饱和度的红色 */
-  border: 4px solid white !important; /* 更粗的边框 */
+  border: 4px solid white !important;
   border-radius: 50% !important;
-  transform: translate(-16px, -16px) !important; /* 调整中心点对齐 */
+  transform: translate(-12px, -12px) !important;
   z-index: 9998 !important;
-  box-shadow: 0 0 0 4px rgba(255, 68, 68, 0.6), 0 4px 16px rgba(255, 68, 68, 0.4) !important; /* 更强的发光效果 */
+  box-shadow: 0 0 0 3px rgba(255,68,68,0.6), 0 4px 12px rgba(0,0,0,0.4) !important;
   pointer-events: none !important;
-  filter: saturate(1.8) brightness(1.1) !important; /* 提高饱和度和亮度 */
 }
 
 .export-title-overlay {
