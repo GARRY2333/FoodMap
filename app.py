@@ -56,11 +56,12 @@ def fetch_amap_pois(keywords: str, types: str, city: str, pages: int = 3, offset
 
         for p in pois:
             loc = p.get("location", "")
-            
-            lng_str, lat_str = loc.split(",")
-            lng = float(lng_str)
-            lat = float(lat_str)
-            
+            try:
+                lng_str, lat_str = loc.split(",")
+                lng = float(lng_str)
+                lat = float(lat_str)
+            except Exception:
+                continue
 
             results.append({
                 "name": p.get("name"),
@@ -90,10 +91,15 @@ def api_restaurants():
     return jsonify({"items": items})
 
 
+ 
+
 
 def _port() -> int:
     val = os.getenv("PORT")
-    return int(val) if val else 5000
+    try:
+        return int(val) if val else 5000
+    except Exception:
+        return 5000
 
 
 
