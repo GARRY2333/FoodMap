@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>北京美食地图</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">北京美食地图</div>
+      <form id="searchForm" class="controls" autocomplete="off">
+        <input type="text" id="keywords" placeholder="搜索关键词，如：火锅、烤鸭" />
+        <select id="type">
+          <option value="050000" selected>餐饮服务</option>
+          <option value="050100">中餐厅</option>
+          <option value="050200">外国餐厅</option>
+          <option value="050300">快餐厅</option>
+          <option value="050500">蛋糕甜品店</option>
+        </select>
+        <button type="submit" class="btn">搜索</button>
+      </form>
+      <div id="status" class="status" aria-live="polite"></div>
+    </header>
+
+    <main id="map" role="region" aria-label="北京地图"></main>
+    <!-- 已移除静态图片生成功能 -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
